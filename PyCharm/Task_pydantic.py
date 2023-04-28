@@ -12,14 +12,13 @@ class School(BaseModel):
     marks: list
 
 
-def validating(req):
+def validating(check_data):
     try:
-        School(**req)
-    except ValidationError as e:
-        print(e.json())
-        return False, e
-    message = "JSON файл коректен"
-    return True, message
+        for smt in check_data:
+            School(**smt)
+        return True
+    except ValidationError:
+        return False
 
 
 def help_info():
@@ -155,15 +154,11 @@ def main():
         elif command.startswith("load "):
             parts = command.split(maxsplit=1)
             file_name = parts[1] + ".json"
-            students = load_students(file_name)
-
-            for smt in students:
-                check, announce = validating(smt)
-                if check:
-                    students = load_students(file_name)
-                else:
-                    print(announce)
-                    break
+            if validating(load_students(file_name)):
+                students = load_students(file_name)
+                print("Файл JSON успешно загружен")
+            else:
+                print("Файл JSON некоректен")
 
         else:
             print(f"Неизвестная команда {command}", file=sys.stderr)

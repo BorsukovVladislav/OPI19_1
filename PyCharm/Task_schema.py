@@ -25,13 +25,11 @@ schema = {
 
 def validating(check_data):
     try:
-        validate(instance=check_data, schema=schema)
+        for smt in check_data:
+            validate(instance=smt, schema=schema)
+        return True
     except jsonschema.exceptions.ValidationError:
-        err = "Ошибка в JSON файле"
-        return False, err
-
-    message = "JSON файл коректен"
-    return True, message
+        return False
 
 
 def help_info():
@@ -167,15 +165,11 @@ def main():
         elif command.startswith("load "):
             parts = command.split(maxsplit=1)
             file_name = parts[1] + ".json"
-            students = load_students(file_name)
-
-            for smt in students:
-                check, announce = validating(smt)
-                if check:
-                    students = load_students(file_name)
-                else:
-                    print(announce)
-                    break
+            if validating(load_students(file_name)):
+                students = load_students(file_name)
+                print("Файл JSON успешно загружен")
+            else:
+                print("Файл JSON некоректен")
 
         else:
             print(f"Неизвестная команда {command}", file=sys.stderr)
